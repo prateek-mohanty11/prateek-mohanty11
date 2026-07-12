@@ -1,7 +1,7 @@
 # 💫 Hi 👋, I'm Prateek Mohanty
 **Aspiring Software Developer || Tech enthusiast || Focused on AI and ML Development , Web Technologies and Real-World Problem Solving**
 
-Email Me 👉 ✉️ **prateekmohanty2006@gmail.com** For Collaboration/Project or Anything Else. 😊😊
+Email Me 👉  **prateekmohanty2006@gmail.com** For Collaboration/Project or Anything Else. 😊
 
 - 🔭 **I’m currently working as:** Social Handle CDD Club  
 - 🌱 **I’m currently learning:** Computer Science Engineering at PMEC
