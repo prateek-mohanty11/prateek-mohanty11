@@ -3,7 +3,7 @@
 
 Email Me 👉  **prateekmohanty2006@gmail.com** For Collaboration/Project or Anything Else. 😊
 
-- 🔭 **I’m currently working as:** Social Handle CDD Club  
+- 🔭 **I’m currently working as:** Management Head IIC Club  
 - 🌱 **I’m currently learning:** Computer Science Engineering at PMEC
 - 💬 **Ask me about:** Good at Solving real life problems
 - ⚡ **Fun fact:** I Love Tech and Tech Love Me
