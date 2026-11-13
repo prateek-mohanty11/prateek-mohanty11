@@ -80,7 +80,7 @@ def font_uri():
     return 'data:font/woff;base64,' + base64.b64encode(target.read_bytes()).decode()
 
 
-def start_svg(height, title, font='', width=W):
+def start_svg(height, title, font='', width=W, extra_defs=''):
     face = f"@font-face{{font-family:ProfileSans;src:url('{font}') format('woff');font-weight:100 900}}" if font else ''
     if not STATIC:
         motion = '''
@@ -112,7 +112,7 @@ def start_svg(height, title, font='', width=W):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="{e(title)}">
     <title>{e(title)}</title><defs><linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop stop-color="{BRAND}"/><stop offset="1" stop-color="{BRAND2}"/></linearGradient>
     <linearGradient id="shine"><stop stop-color="{BRAND}" stop-opacity="0"/><stop offset=".5" stop-color="{ACCENT}"/><stop offset="1" stop-color="{BRAND}" stop-opacity="0"/></linearGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="26"/></filter><style>{face}
+    <filter id="blur"><feGaussianBlur stdDeviation="26"/></filter>{extra_defs}<style>{face}
     text{{font-family:{FONT}}}.title{{fill:{TEXT};font-size:31px;font-weight:750;letter-spacing:-.8px}}.sub{{fill:{MUTED};font-size:15px}}
     .label{{fill:{MUTED};font-size:12px;font-weight:650;letter-spacing:1.5px}}.metric{{fill:{TEXT};font-size:29px;font-weight:800}}
     .small{{fill:{MUTED};font-size:13px}}.panel{{fill:{PANEL};stroke:{BORDER};stroke-width:1.2}}{motion}</style></defs>
@@ -177,7 +177,15 @@ def render_hero(data, font):
                 avatar_uri = f'data:{mime};base64,' + base64.b64encode(response.read()).decode()
         except Exception:
             avatar_uri = ''  # Portrait is optional; fall back to the PM monogram.
-    s = start_svg(280, f'{name} profile introduction', font)
+
+    extra_defs = ''
+    if avatar_uri:
+        extra_defs = f'''<pattern id="avatarPattern" patternUnits="userSpaceOnUse" x="761" y="74" width="126" height="126">
+      <image href="{avatar_uri}" xlink:href="{avatar_uri}" x="0" y="0" width="126" height="126" preserveAspectRatio="xMidYMid slice"/>
+    </pattern>
+    <clipPath id="avatarClip"><circle cx="824" cy="137" r="63"/></clipPath>'''
+
+    s = start_svg(280, f'{name} profile introduction', font, extra_defs=extra_defs)
     s += f'''<rect x="24" y="24" width="912" height="232" rx="22" class="panel"/><rect x="24" y="24" width="5" height="232" rx="2" fill="url(#brand)"/>
     <g class="enter" style="animation-delay:0s"><text x="64" y="72" class="label">HELLO, I'M</text><text x="64" y="128" class="title" font-size="48">{e(name)}</text>
     <text x="64" y="164" class="sub">{e(bio[:100])}</text><rect x="64" y="193" width="150" height="38" rx="19" fill="url(#brand)"/>
@@ -187,7 +195,8 @@ def render_hero(data, font):
     <circle cx="824" cy="137" r="82" fill="{BRAND}" opacity=".13" class="pulse"/>'''
     if avatar_uri:
         s += f'''<g class="enter float" style="animation-delay:.15s"><circle cx="824" cy="137" r="69" fill="url(#brand)"/>
-        <clipPath id="avatarClip"><circle cx="824" cy="137" r="63"/></clipPath><image href="{avatar_uri}" xlink:href="{avatar_uri}" x="761" y="74" width="126" height="126" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatarClip)"/></g>'''
+        <circle cx="824" cy="137" r="63" fill="url(#avatarPattern)"/>
+        <image href="{avatar_uri}" xlink:href="{avatar_uri}" x="761" y="74" width="126" height="126" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatarClip)"/></g>'''
     else:
         s += '<g class="enter float" style="animation-delay:.15s"><circle cx="824" cy="137" r="69" fill="url(#brand)"/><text x="824" y="154" text-anchor="middle" fill="#fff" font-size="46" font-weight="800">PM</text></g>'
     save('01-hero.svg', s)
