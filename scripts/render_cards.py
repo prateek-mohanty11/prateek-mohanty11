@@ -180,7 +180,7 @@ def render_hero(data, font):
 
     extra_defs = ''
     if avatar_uri:
-        extra_defs = f'''<pattern id="avatarPattern" patternUnits="userSpaceOnUse" x="761" y="74" width="126" height="126">
+        extra_defs = f'''<pattern id="avatarPattern" patternUnits="userSpaceOnUse" x="761" y="74" width="126" height="126" viewBox="0 0 126 126">
       <image href="{avatar_uri}" xlink:href="{avatar_uri}" x="0" y="0" width="126" height="126" preserveAspectRatio="xMidYMid slice"/>
     </pattern>
     <clipPath id="avatarClip"><circle cx="824" cy="137" r="63"/></clipPath>'''
