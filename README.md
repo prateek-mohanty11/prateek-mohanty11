@@ -1,6 +1,20 @@
 <div align="center">
   <img src="cards/01-hero.svg" alt="Prateek Mohanty — introduction" width="100%">
-  <br>
+</div>
+
+<br>
+
+### 💫 About Me
+
+- 📬 **Email Me 👉** [**prateekmohanty2006@gmail.com**](mailto:prateekmohanty2006@gmail.com) For Collaboration/Project or Anything Else. 😊
+- 🔭 **I’m currently working as:** Management Head [**IIC Club**](https://www.linkedin.com/company/idea-and-innovation-cell-pmec/)  
+- 🌱 **I’m currently learning:** Computer Science Engineering at [**PMEC**](https://pmec.ac.in)  
+- 💬 **Ask me about:** Good at Solving real life problems  
+- ⚡ **Fun fact:** I Love Tech and Tech Love Me  
+
+<br>
+
+<div align="center">
   <a href="https://github.com/prateek-mohanty11"><img src="cards/02-github.svg" alt="GitHub profile" width="32.5%"></a>
   <a href="https://www.linkedin.com/in/prateek-mohanty-134806331"><img src="cards/02-linkedin.svg" alt="LinkedIn profile" width="32.5%"></a>
   <a href="https://prateek-mohanty.vercel.app"><img src="cards/02-portfolio.svg" alt="Portfolio website" width="32.5%"></a>
@@ -14,13 +28,6 @@
 </div>
 
 <br>
-
-### 💫 About Me
-- 🔭 **Current Role:** Event Management Head at Idea & Innovation Cell (IIC Club, PMEC)
-- 🌱 **Academics:** Computer Science & Engineering (B.Tech) at Parala Maharaja Engineering College (PMEC)
-- 💡 **Focus:** AI & ML Development, Web Technologies, and Real-World Problem Solving
-- ⚡ **Fun Fact:** I Love Tech and Tech Loves Me
-- 📬 **Email:** [prateekmohanty2006@gmail.com](mailto:prateekmohanty2006@gmail.com)
 
 ---
 
