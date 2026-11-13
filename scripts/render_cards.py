@@ -156,36 +156,82 @@ def calc_streaks(days):
     return current, longest
 
 
+def vectorize_avatar(image_path_or_bytes, size=126, num_colors=72):
+    try:
+        from PIL import Image
+        import io
+        if isinstance(image_path_or_bytes, (bytes, bytearray)):
+            im = Image.open(io.BytesIO(image_path_or_bytes))
+        else:
+            im = Image.open(image_path_or_bytes)
+
+        # Center crop to square
+        w, h = im.size
+        dim = min(w, h)
+        left = (w - dim) // 2
+        top = (h - dim) // 2
+        im = im.crop((left, top, left + dim, top + dim))
+
+        im_resized = im.resize((size, size), Image.Resampling.LANCZOS)
+        im_q = im_resized.quantize(colors=num_colors).convert('RGB')
+
+        paths_by_color = defaultdict(list)
+        r = size / 2
+        cx, cy = r, r
+
+        for y in range(size):
+            run_start = None
+            last_color = None
+            for x in range(size):
+                dist_sq = (x + 0.5 - cx)**2 + (y + 0.5 - cy)**2
+                if dist_sq > r**2:
+                    if run_start is not None:
+                        paths_by_color[last_color].append(f'M{run_start} {y}h{x - run_start}v1h{run_start - x}z')
+                        run_start = None
+                    continue
+
+                c = im_q.getpixel((x, y))
+                hex_color = f'#{c[0]:02x}{c[1]:02x}{c[2]:02x}'
+
+                if run_start is None:
+                    run_start = x
+                    last_color = hex_color
+                elif hex_color != last_color:
+                    paths_by_color[last_color].append(f'M{run_start} {y}h{x - run_start}v1h{run_start - x}z')
+                    run_start = x
+                    last_color = hex_color
+
+            if run_start is not None:
+                paths_by_color[last_color].append(f'M{run_start} {y}h{size - run_start}v1h{run_start - size}z')
+
+        svg_paths = ''.join(f'<path fill="{c}" d="{"".join(d)}"/>' for c, d in paths_by_color.items())
+        return f'<g transform="translate(761, 74)">{svg_paths}</g>'
+    except Exception as exc:
+        print(f"Warning: avatar vectorization failed: {exc}")
+        return ''
+
+
 def render_hero(data, font):
     name = data.get('name') or 'Prateek Mohanty'
     bio = data.get('bio') or 'Engineering student • Developer • AI/ML enthusiast'
     profile = data.get('profile_url') or 'https://github.com/prateek-mohanty11'
     website = data.get('website_url') or 'https://prateek-mohanty.vercel.app'
     avatar = data.get('avatar_url')
-    avatar_uri = ''
+    avatar_vector = ''
 
     # Prioritize local profile photo in assets if present
     local_avatar = ROOT / 'assets' / 'my_photo.jpeg'
     if local_avatar.exists():
-        mime = 'image/jpeg'
-        avatar_uri = f'data:{mime};base64,' + base64.b64encode(local_avatar.read_bytes()).decode()
+        avatar_vector = vectorize_avatar(local_avatar)
     elif avatar:
         try:
             req = urllib.request.Request(avatar, headers={'User-Agent': 'profile-svg-card-builder'})
             with urllib.request.urlopen(req, timeout=12) as response:
-                mime = response.headers.get_content_type() or 'image/jpeg'
-                avatar_uri = f'data:{mime};base64,' + base64.b64encode(response.read()).decode()
+                avatar_vector = vectorize_avatar(response.read())
         except Exception:
-            avatar_uri = ''  # Portrait is optional; fall back to the PM monogram.
+            avatar_vector = ''  # Fall back to the PM monogram.
 
-    extra_defs = ''
-    if avatar_uri:
-        extra_defs = f'''<pattern id="avatarPattern" patternUnits="userSpaceOnUse" x="761" y="74" width="126" height="126" viewBox="0 0 126 126">
-      <image href="{avatar_uri}" xlink:href="{avatar_uri}" x="0" y="0" width="126" height="126" preserveAspectRatio="xMidYMid slice"/>
-    </pattern>
-    <clipPath id="avatarClip"><circle cx="824" cy="137" r="63"/></clipPath>'''
-
-    s = start_svg(280, f'{name} profile introduction', font, extra_defs=extra_defs)
+    s = start_svg(280, f'{name} profile introduction', font)
     s += f'''<rect x="24" y="24" width="912" height="232" rx="22" class="panel"/><rect x="24" y="24" width="5" height="232" rx="2" fill="url(#brand)"/>
     <g class="enter" style="animation-delay:0s"><text x="64" y="72" class="label">HELLO, I'M</text><text x="64" y="128" class="title" font-size="48">{e(name)}</text>
     <text x="64" y="164" class="sub">{e(bio[:100])}</text><rect x="64" y="193" width="150" height="38" rx="19" fill="url(#brand)"/>
@@ -193,10 +239,9 @@ def render_hero(data, font):
     <a href="{e(profile)}" xlink:href="{e(profile)}" target="_blank"><rect x="64" y="193" width="150" height="38" rx="19" fill="transparent"/></a>
     <a href="{e(website)}" xlink:href="{e(website)}" target="_blank"><text x="235" y="217" fill="{ACCENT}" font-size="13" font-weight="700">PORTFOLIO ↗</text></a></g>
     <circle cx="824" cy="137" r="82" fill="{BRAND}" opacity=".13" class="pulse"/>'''
-    if avatar_uri:
+    if avatar_vector:
         s += f'''<g class="enter float" style="animation-delay:.15s"><circle cx="824" cy="137" r="69" fill="url(#brand)"/>
-        <circle cx="824" cy="137" r="63" fill="url(#avatarPattern)"/>
-        <image href="{avatar_uri}" xlink:href="{avatar_uri}" x="761" y="74" width="126" height="126" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatarClip)"/></g>'''
+        {avatar_vector}</g>'''
     else:
         s += '<g class="enter float" style="animation-delay:.15s"><circle cx="824" cy="137" r="69" fill="url(#brand)"/><text x="824" y="154" text-anchor="middle" fill="#fff" font-size="46" font-weight="800">PM</text></g>'
     save('01-hero.svg', s)

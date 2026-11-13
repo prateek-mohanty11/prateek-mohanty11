@@ -22,7 +22,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fonts-dejavu-core
-          python -m pip install --upgrade pip fonttools brotli
+          python -m pip install --upgrade pip fonttools brotli pillow
       - name: Refresh contribution JSON from GitHub GraphQL
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

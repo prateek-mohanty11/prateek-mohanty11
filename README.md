@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="cards/01-hero.svg?v=3" alt="Prateek Mohanty — introduction" width="100%">
+  <img src="cards/01-hero.svg?v=4" alt="Prateek Mohanty — introduction" width="100%">
 </div>
 
 <br>
