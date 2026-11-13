@@ -163,7 +163,13 @@ def render_hero(data, font):
     website = data.get('website_url') or 'https://prateek-mohanty.vercel.app'
     avatar = data.get('avatar_url')
     avatar_uri = ''
-    if avatar:
+
+    # Prioritize local profile photo in assets if present
+    local_avatar = ROOT / 'assets' / 'my_photo.jpeg'
+    if local_avatar.exists():
+        mime = 'image/jpeg'
+        avatar_uri = f'data:{mime};base64,' + base64.b64encode(local_avatar.read_bytes()).decode()
+    elif avatar:
         try:
             req = urllib.request.Request(avatar, headers={'User-Agent': 'profile-svg-card-builder'})
             with urllib.request.urlopen(req, timeout=12) as response:
