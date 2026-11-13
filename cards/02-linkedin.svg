@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="312" height="116" viewBox="0 0 312 116" role="img" aria-label="LinkedIn link">
+    <title>LinkedIn link</title><defs><linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="shine"><stop stop-color="#a855f7" stop-opacity="0"/><stop offset=".5" stop-color="#c4b5fd"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="26"/></filter><style>
+    text{font-family:ProfileSans, Inter, ui-sans-serif, system-ui, sans-serif}.title{fill:#f5f3ff;font-size:31px;font-weight:750;letter-spacing:-.8px}.sub{fill:#a6a0bd;font-size:15px}
+    .label{fill:#a6a0bd;font-size:12px;font-weight:650;letter-spacing:1.5px}.metric{fill:#f5f3ff;font-size:29px;font-weight:800}
+    .small{fill:#a6a0bd;font-size:13px}.panel{fill:#11111f;stroke:#30264a;stroke-width:1.2}
+      .enter{opacity:0;transform:translateY(16px);animation:rise .8s cubic-bezier(.2,.75,.2,1) both}
+      .pulse{animation:pulse 4s ease-in-out infinite}
+      .draw{stroke-dasharray:1100;stroke-dashoffset:1100;animation:draw 1.8s ease-out forwards}
+      .float{animation:float 5s ease-in-out infinite}
+      @keyframes rise{to{opacity:1;transform:translateY(0)}}
+      @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+      @keyframes draw{to{stroke-dashoffset:0}}
+      @keyframes float{50%{transform:translateY(-5px)}}
+      @media(prefers-reduced-motion:reduce){
+        *,*::before,*::after{animation:none!important;transition:none!important}
+        .enter{opacity:1!important;transform:none!important}
+        .pulse,.float{animation:none!important;transform:none!important}
+        animate,animateTransform,animateMotion{display:none!important}
+        .shine-anim{display:none!important}
+      }</style></defs>
+    <rect width="312" height="116" rx="26" fill="#090914"/><circle cx="268" cy="38" r="125" fill="#a855f7" opacity=".12" filter="url(#blur)"/>
+    <rect x="1" y="1" width="310" height="114" rx="25" fill="none" stroke="#30264a"/><a href="https://www.linkedin.com/in/prateek-mohanty-134806331" xlink:href="https://www.linkedin.com/in/prateek-mohanty-134806331" target="_blank"><g class="enter" style="animation-delay:1.05s">
+    <rect x="8" y="8" width="296" height="100" rx="18" fill="#17152a" stroke="#30264a"/><rect x="9" y="9" width="294" height="3" rx="2" fill="url(#brand)"/>
+    <text x="28" y="53" fill="#f5f3ff" font-size="23" font-weight="750">LinkedIn</text><text x="28" y="80" class="small">OPEN ↗</text>
+    <circle cx="270" cy="58" r="23" fill="url(#brand)"/><text x="270" y="65" text-anchor="middle" fill="#fff" font-size="21" font-weight="800">↗</text></g></a></svg>

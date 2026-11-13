@@ -1,0 +1,116 @@
+name: Refresh animated GitHub profile cards
+
+on:
+  schedule:
+    - cron: '17 1 * * *' # Daily at 01:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out profile repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install font subsetting tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-dejavu-core
+          python -m pip install --upgrade pip fonttools brotli
+      - name: Refresh contribution JSON from GitHub GraphQL
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USER: prateek-mohanty11
+        run: |
+          mkdir -p data
+          python - <<'PY'
+          import json, os, urllib.request
+          from datetime import datetime, timezone
+          query = '''query($login: String!) {
+            user(login: $login) {
+              name avatarUrl url
+              contributionsCollection { contributionCalendar {
+                totalContributions weeks { contributionDays { date contributionCount } }
+              }}
+              repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC,
+                orderBy: {field: UPDATED_AT, direction: DESC}) {
+                nodes { name description url stargazerCount forkCount primaryLanguage { name } }
+              }
+            }
+          }'''
+          body = json.dumps({'query': query, 'variables': {'login': os.environ['GH_USER']}}).encode()
+          req = urllib.request.Request('https://api.github.com/graphql', data=body, headers={
+            'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Content-Type': 'application/json',
+            'User-Agent': 'profile-svg-card-builder'})
+          with urllib.request.urlopen(req) as response: result = json.load(response)
+          if result.get('errors'): raise SystemExit(result['errors'])
+          user = result['data']['user']
+          cal = user['contributionsCollection']['contributionCalendar']
+          contributions = [{'date': d['date'], 'count': d['contributionCount']}
+            for week in cal['weeks'] for d in week['contributionDays']]
+          # Map featured projects to actual public GitHub repositories
+          featured_targets = [
+            {'aliases': ['needsense', 'needsenseai', 'need-sense'], 'display': 'NEEDSENSE AI'},
+            {'aliases': ['skillgapradar', 'skillriskcalculator', 'skillpilot'], 'display': 'SkillGapRadar'},
+            {'aliases': ['lexilab', 'finiteautomatalexer', 'lexer'], 'display': 'Lexilab'}
+          ]
+          repo_nodes = user['repositories']['nodes']
+          featured = []
+          for target in featured_targets:
+            r = next((item for item in repo_nodes if any(a in ''.join(ch for ch in item['name'].lower() if ch.isalnum()) for a in target['aliases'])), None)
+            if r:
+              featured.append({'name': r['name'], 'description': r['description'] or f"{target['display']} project", 'url': r['url'],
+                'language': (r['primaryLanguage'] or {}).get('name', 'Project'),
+                'stars': r['stargazerCount'], 'forks': r['forkCount']})
+          data = {'user': os.environ['GH_USER'], 'name': user['name'] or 'Prateek Mohanty',
+            'bio': 'Engineering student • Developer • AI/ML enthusiast', 'profile_url': user['url'],
+            'website_url': 'https://prateek-mohanty.vercel.app',
+            'linkedin_url': 'https://www.linkedin.com/in/prateek-mohanty-134806331',
+            'avatar_url': user['avatarUrl'], 'generated_at': datetime.now(timezone.utc).isoformat(),
+            'total_contributions': cal['totalContributions'], 'contributions': contributions,
+            'featured_repos': featured}
+          with open('data/contributions.json', 'w', encoding='utf-8') as f: json.dump(data, f, indent=2, ensure_ascii=False)
+          PY
+      - name: Make a font available for subsetting
+        run: |
+          mkdir -p assets
+          cp /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf assets/ProfileSans.ttf
+      - name: Render SVG cards
+        env:
+          FONT_FILE: assets/ProfileSans.ttf
+          CARD_BRAND: '#a855f7'
+          CARD_BRAND_2: '#7c3aed'
+          CARD_BG: '#090914'
+          CARD_PANEL: '#11111f'
+          CARD_PANEL_2: '#17152a'
+          CARD_TEXT: '#f5f3ff'
+          CARD_MUTED: '#a6a0bd'
+        run: python scripts/render_cards.py
+      - name: Update featured repository images in README
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          readme = Path('README.md')
+          text = readme.read_text(encoding='utf-8')
+          start, end = '<!-- FEATURED_REPOS_START -->', '<!-- FEATURED_REPOS_END -->'
+          if start not in text or end not in text:
+            raise SystemExit('Add FEATURED_REPOS_START and FEATURED_REPOS_END markers to README.md first.')
+          cards = Path('cards/featured-repos.md').read_text(encoding='utf-8').rstrip()
+          before, rest = text.split(start, 1)
+          _, after = rest.split(end, 1)
+          readme.write_text(before + start + '\n' + (cards + '\n' if cards else '') + end + after, encoding='utf-8')
+          PY
+      - name: Commit refreshed contribution data and cards
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/contributions.json cards/ README.md
+          git diff --cached --quiet || git commit -m 'chore: refresh animated profile cards'
+          git push
+
